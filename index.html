@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposta de Solução IA - Alfa Imports Ltda.</title>
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #005a9c;
+            --accent-color: #f39c12;
+            --light-gray: #f4f6f9;
+            --dark-gray: #333;
+            --text-color: #555;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        
+        h2 {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        section {
+            background-color: #fff;
+            margin-bottom: 25px;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- CABEÇALHO --- */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            color: #fff;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        /* --- MENSAGENS DE FEEDBACK --- */
+        #message-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Inicia oculto */
+        }
+        #message-box.success { background-color: var(--success-color); }
+        #message-box.error { background-color: var(--danger-color); }
+
+        /* --- PAINEL DE CONTROLES --- */
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .control-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-gray);
+        }
+        .control-group select, .control-group input, .control-group button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .control-group input[type="file"] {
+            padding: 3px;
+        }
+        .control-group button {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-top: auto; /* Alinha o botão na parte inferior do grupo */
+        }
+        .control-group button:hover {
+            background-color: #d68910;
+        }
+
+        /* --- DASHBOARD --- */
+        #dashboard {
+            display: grid;
+            gap: 20px;
+        }
+
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+        .card .value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        .card .value.positive { color: var(--success-color); }
+        .card .value.negative { color: var(--danger-color); }
+        .card .subtext {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 992px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            width: 100%;
+            height: 300px;
+        }
+
+        .pie-chart-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        #pie-chart-legend {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #pie-chart-legend li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        #pie-chart-legend .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        
+        /* --- TABELA DE DADOS --- */
+        .table-container {
+            overflow-x: auto;
+        }
+        #data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #data-table th, #data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        #data-table th {
+            background-color: var(--secondary-color);
+            color: white;
+            cursor: pointer;
+        }
+        #data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        #data-table tr.anomaly {
+            background-color: #fff0f1;
+            font-weight: bold;
+        }
+        #table-filter {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        /* --- LISTAS E SEÇÕES INFORMATIVAS --- */
+        .feature-list, .timeline {
+            list-style: none;
+            padding-left: 0;
+        }
+        .feature-list li, .timeline li {
+            padding-left: 30px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .feature-list li::before, .timeline li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .timeline li::before {
+            content: '»';
+            color: var(--accent-color);
+        }
+        .timeline strong {
+            display: block;
+            color: var(--dark-gray);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Proposta de Solução com Inteligência Artificial</h1>
+        <p>Para Alfa Imports Ltda.</p>
+    </header>
+
+    <div class="container">
+        
+        <div id="message-box"></div>
+
+        <section id="contexto">
+            <h2>1. Contexto e Desafios Atuais</h2>
+            <p>A <strong>Alfa Imports Ltda.</strong>, uma empresa de médio porte no setor de importação e distribuição de peças automotivas, enfrenta desafios operacionais e estratégicos significativos. O seu ERP local, sem integração com tecnologias modernas de IA, gera gargalos importantes:</p>
+            <ul>
+                <li><strong>Setor Financeiro e Contábil:</strong> Processos manuais de lançamento consomem tempo excessivo, aumentam o risco de inconsistências e atrasam o fechamento contábil.</li>
+                <li><strong>Gestão de Vendas e Estoque:</strong> A previsão de demanda e o controle de reposição se baseiam em análises históricas simples, sem o apoio de modelos preditivos, o que compromete a assertividade e pode levar a excesso ou falta de estoque.</li>
+                <li><strong>Tomada de Decisão:</strong> A falta de dados consolidados e insights preditivos limita a agilidade e a precisão nas decisões estratégicas da diretoria.</li>
+            </ul>
+        </section>
+
+        <section id="proposta">
+            <h2>2. Proposta de Solução Integrada com IA</h2>
+            <p>Propomos uma solução robusta e escalável que integra Inteligência Artificial aos processos existentes, transformando dados brutos em insights acionáveis. A solução se baseia em quatro frentes de atuação:</p>
+            <ul class="feature-list">
+                <li><strong>Previsão de Vendas e Estoque:</strong> Implementação de modelos de regressão para estimar a demanda futura com alta precisão, otimizando os níveis de estoque e o capital de giro.</li>
+                <li><strong>Detecção de Inconsistências Contábeis:</strong> Utilização de modelos de classificação (como árvores de decisão) para identificar automaticamente lançamentos anômalos, reduzindo erros, fraudes e o tempo de auditoria.</li>
+                <li><strong>Análise Inteligente de Documentos (NLP):</strong> Aplicação de Processamento de Linguagem Natural para extrair, categorizar e resumir informações de relatórios, e-mails e notas fiscais, automatizando tarefas administrativas.</li>
+                <li><strong>Painel Gerencial Interativo (Dashboard):</strong> Centralização de todos os resultados em dashboards dinâmicos (Power BI), fornecendo previsões, alertas e relatórios visuais para suporte à decisão em tempo real.</li>
+            </ul>
+        </section>
+
+        <section id="demonstracao">
+            <h2>3. Demonstração Dinâmica da Solução</h2>
+            <p>Interaja com uma simulação simplificada da solução. Use nossos dados de exemplo ou faça o upload de um arquivo CSV para ver a mágica acontecer. O arquivo deve conter colunas como 'data', 'produto', 'quantidade_vendida', 'valor_transacao', 'categoria_contabil', 'descricao'.</p>
+
+            <!-- Painel de Controles da Simulação -->
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="data-source">Fonte de Dados:</label>
+                    <select id="data-source">
+                        <option value="sample" selected>Usar Dados de Exemplo</option>
+                        <option value="upload">Carregar Arquivo CSV</option>
+                    </select>
+                    <input type="file" id="csv-file-input" accept=".csv" style="display: none; margin-top: 10px;">
+                </div>
+                <div class="control-group">
+                    <label for="predictor-var">Variável para Prever (Y):</label>
+                    <select id="predictor-var">
+                        <option value="quantidade_vendida">Quantidade Vendida</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="feature-var">Base da Previsão (X):</label>
+                    <select id="feature-var">
+                        <option value="id">Tempo (ID sequencial)</option>
+                        <option value="valor_transacao">Valor da Transação</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="anomaly-threshold">Limiar de Anomalia (Valor):</label>
+                    <input type="number" id="anomaly-threshold" value="5000">
+                </div>
+                <div class="control-group">
+                    <label for="train-test-split">Divisão Treino/Teste (% Treino):</label>
+                    <input type="range" id="train-test-split" min="50" max="90" value="80">
+                    <span id="split-value">80%</span>
+                </div>
+                <div class="control-group">
+                    <button id="run-analysis-btn">Executar Análise</button>
+                </div>
+            </div>
+
+            <!-- Dashboard de Resultados -->
+            <div id="dashboard">
+                <h3>Painel de Resultados</h3>
+                <div class="kpi-cards">
+                    <div class="card">
+                        <h3>Tempo de Fechamento</h3>
+                        <div class="value positive" id="kpi-time-reduction">-30%</div>
+                        <div class="subtext">Redução Estimada</div>
+                    </div>
+                    <div class="card">
+                        <h3>Erros de Lançamento</h3>
+                        <div class="value positive" id="kpi-error-reduction">-40%</div>
+                        <div class="subtext">Redução Estimada</div>
+                    </div>
+                    <div class="card">
+                        <h3>Precisão da Previsão</h3>
+                        <div class="value" id="kpi-accuracy">0%</div>
+                        <div class="subtext">Modelo de Vendas</div>
+                    </div>
+                    <div class="card">
+                        <h3>Alertas de Anomalia</h3>
+                        <div class="value negative" id="kpi-anomalies">0</div>
+                        <div class="subtext">Lançamentos Identificados</div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-box">
+                        <h3>Previsão de Vendas vs. Realidade</h3>
+                        <canvas id="prediction-chart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h3>Análise de Texto (NLP)</h3>
+                         <div class="pie-chart-container">
+                            <canvas id="nlp-pie-chart" height="150" width="150"></canvas>
+                            <ul id="pie-chart-legend"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <h3>Dados Processados</h3>
+                    <input type="text" id="table-filter" placeholder="Filtrar dados da tabela...">
+                    <div class="table-container">
+                        <table id="data-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="riscos">
+            <h2>4. Riscos, Conformidade e Cuidados</h2>
+            <p>A implementação de uma solução de IA exige responsabilidade e planejamento. Os seguintes pontos serão tratados com prioridade máxima:</p>
+            <ul class="feature-list">
+                <li><strong>Conformidade com a LGPD:</strong> Todos os dados de clientes e fornecedores serão tratados de forma anonimizada ou pseudoanonimizada durante o treinamento dos modelos. O acesso aos dados e aos dashboards será controlado por perfis de usuário, garantindo que apenas pessoal autorizado tenha acesso a informações sensíveis.</li>
+                <li><strong>Gestão da Mudança:</strong> Reconhecemos a possibilidade de resistência da equipe. Um plano de engajamento e treinamento contínuo será executado para demonstrar como a IA é uma ferramenta de apoio, que automatiza tarefas repetitivas e libera os colaboradores para atividades de maior valor estratégico.</li>
+                <li><strong>Monitoramento de Viés:</strong> Modelos de IA podem perpetuar vieses presentes nos dados históricos. Implementaremos um monitoramento contínuo da performance dos modelos para garantir que eles se mantenham justos e relevantes para o cenário de mercado atual.</li>
+            </ul>
+        </section>
+
+        <section id="plano">
+            <h2>5. Plano de Implementação (Prazo Total: 8 Meses)</h2>
+            <p>O projeto será dividido em três fases claras e gerenciáveis, com apoio de consultoria especializada para garantir a transferência de conhecimento para a equipe interna da Alfa Imports.</p>
+            <ol class="timeline">
+                <li>
+                    <strong>Fase 1: Preparação e Integração de Dados (Meses 1-2)</strong>
+                    Levantamento das fontes de dados (ERP, planilhas), desenvolvimento de rotinas de ETL (Extração, Transformação e Carga) e configuração da infraestrutura em nuvem para armazenar e processar os dados de forma segura.
+                </li>
+                <li>
+                    <strong>Fase 2: Desenvolvimento e Testes dos Modelos (Meses 3-5)</strong>
+                    Criação, treinamento e validação dos modelos de regressão (vendas), classificação (anomalias) e NLP. Os modelos serão rigorosamente testados para garantir a precisão e performance definidas como meta.
+                </li>
+                <li>
+                    <strong>Fase 3: Implantação dos Dashboards e Treinamento (Meses 6-8)</strong>
+                    Integração dos resultados dos modelos com a ferramenta de BI (Power BI), criação dos painéis gerenciais e realização de workshops de treinamento para a equipe financeira, contábil e diretoria. Início da operação assistida.
+                </li>
+            </ol>
+        </section>
+
+    </div>
+
+    <script>
+    // --- INÍCIO DO CÓDIGO JAVASCRIPT ---
+
+    // Dados de exemplo em formato CSV embutidos no código.
+    const sampleCSVData = `id,data,produto,quantidade_vendida,valor_transacao,categoria_contabil,descricao
+1,2023-01-05,Pistao Motor AP,150,22500,Receita,Venda para oficina AutoPeças Brasil
+2,2023-01-10,Filtro de Ar,300,3000,Receita,Venda distribuidor regional SP
+3,2023-01-15,Vela de Ignicao,500,7500,Receita,Pedido grande para frota de taxis
+4,2023-01-20,Oleo Motor 5W30,200,8000,Receita,Venda varejo online
+5,2023-01-25,Pneu Aro 15,80,24000,Receita,Venda para concessionaria local
+6,2023-02-05,Pistao Motor AP,165,24750,Receita,Venda recorrente AutoPeças Brasil
+7,2023-02-10,Filtro de Ar,320,3200,Receita,Venda distribuidor regional SP
+8,2023-02-15,Vela de Ignicao,550,8250,Receita,Novo pedido para frota
+9,2023-02-20,Oleo Motor 5W30,210,8400,Receita,Venda varejo online
+10,2023-02-25,Pneu Aro 15,85,25500,Receita,Venda para concessionaria local
+11,2023-03-05,Pistao Motor AP,180,27000,Receita,Venda AutoPeças Brasil
+12,2023-03-08,Adiantamento Fornecedor,1,12000,Despesa,Pagamento adiantado importacao lote China
+13,2023-03-10,Filtro de Ar,350,3500,Receita,Venda distribuidor regional SP
+14,2023-03-15,Vela de Ignicao,600,9000,Receita,Pedido frota
+15,2023-03-17,Compra de Equipamento,1,5150,Despesa,Aquisicao de novo servidor para o escritorio
+16,2023-03-20,Oleo Motor 5W30,230,9200,Receita,Venda online
+17,2023-03-25,Pneu Aro 15,90,27000,Receita,Venda concessionaria
+18,2023-04-01,Marketing Digital,1,2500,Despesa,Pagamento campanha Google Ads
+19,2023-04-05,Pistao Motor AP,195,29250,Receita,Venda AutoPeças Brasil
+20,2023-04-10,Filtro de Ar,380,3800,Receita,Venda distribuidor
+21,2023-04-12,Correcao Lancamento,1,9999,Ajuste,Correcao de valor de lancamento fiscal anterior
+22,2023-04-15,Vela de Ignicao,650,9750,Receita,Pedido frota
+23,2023-04-20,Oleo Motor 5W30,250,10000,Receita,Venda online
+24,2023-04-25,Pneu Aro 15,100,30000,Receita,Venda concessionaria
+25,2023-05-05,Pistao Motor AP,210,31500,Receita,Venda AutoPeças Brasil`;
+
+    // Referências aos elementos do DOM
+    const UIElements = {
+        dataSourceSelect: document.getElementById('data-source'),
+        fileInput: document.getElementById('csv-file-input'),
+        predictorVarSelect: document.getElementById('predictor-var'),
+        featureVarSelect: document.getElementById('feature-var'),
+        anomalyThresholdInput: document.getElementById('anomaly-threshold'),
+        splitRange: document.getElementById('train-test-split'),
+        splitValue: document.getElementById('split-value'),
+        runButton: document.getElementById('run-analysis-btn'),
+        messageBox: document.getElementById('message-box'),
+        kpiTime: document.getElementById('kpi-time-reduction'),
+        kpiError: document.getElementById('kpi-error-reduction'),
+        kpiAccuracy: document.getElementById('kpi-accuracy'),
+        kpiAnomalies: document.getElementById('kpi-anomalies'),
+        tableHeader: document.querySelector('#data-table thead'),
+        tableBody: document.querySelector('#data-table tbody'),
+        tableFilter: document.getElementById('table-filter'),
+        predictionChartCtx: document.getElementById('prediction-chart').getContext('2d'),
+        nlpPieChartCtx: document.getElementById('nlp-pie-chart').getContext('2d'),
+        pieChartLegend: document.getElementById('pie-chart-legend'),
+    };
+
+    // Variáveis globais para armazenar estado
+    let chartInstances = {};
+    let fullData = [];
+
+    /**
+     * Exibe uma mensagem de feedback (sucesso ou erro) no topo da página.
+     * @param {string} message - A mensagem a ser exibida.
+     * @param {string} type - 'success' ou 'error'.
+     */
+    function showMessage(message, type = 'success') {
+        UIElements.messageBox.textContent = message;
+        UIElements.messageBox.className = type;
+        UIElements.messageBox.style.display = 'block';
+    }
+
+    /**
+     * Converte um texto CSV em um array de objetos.
+     * @param {string} csvText - O conteúdo do arquivo CSV.
+     * @returns {Array<Object>} Array de objetos representando os dados.
+     */
+    function parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        return lines.slice(1).map(line => {
+            const values = line.split(',');
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header] = values[index] ? values[index].trim() : '';
+            });
+            return obj;
+        });
+    }
+
+    /**
+     * Limpa e pré-processa os dados. Converte strings numéricas para números.
+     * @param {Array<Object>} rawData - Os dados brutos do CSV.
+     * @returns {Array<Object>} Os dados limpos.
+     */
+    function cleanData(rawData) {
+        return rawData.map(row => {
+            const cleanedRow = {};
+            for (const key in row) {
+                const value = row[key];
+                // Tenta converter para número se não for NaN
+                cleanedRow[key] = !isNaN(parseFloat(value)) && isFinite(value) ? parseFloat(value) : value;
+            }
+            return cleanedRow;
+        });
+    }
+
+    /**
+     * Divide os dados em conjuntos de treino e teste.
+     * @param {Array<Object>} data - O conjunto de dados completo.
+     * @param {number} splitRatio - A proporção para o conjunto de treino (ex: 0.8 para 80%).
+     * @returns {{trainData: Array<Object>, testData: Array<Object>}}
+     */
+    function trainTestSplit(data, splitRatio) {
+        const splitIndex = Math.floor(data.length * splitRatio);
+        const trainData = data.slice(0, splitIndex);
+        const testData = data.slice(splitIndex);
+        return { trainData, testData };
+    }
+
+    /**
+     * Treina um modelo de Regressão Linear Simples.
+     * @param {Array<Object>} trainData - Dados de treino.
+     * @param {string} xVar - Nome da variável independente (feature).
+     * @param {string} yVar - Nome da variável dependente (alvo).
+     * @returns {{slope: number, intercept: number}} O modelo treinado.
+     */
+    function trainLinearRegression(trainData, xVar, yVar) {
+        const n = trainData.length;
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        
+        trainData.forEach(p => {
+            sumX += p[xVar];
+            sumY += p[yVar];
+            sumXY += p[xVar] * p[yVar];
+            sumXX += p[xVar] * p[xVar];
+        });
+
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+
+        return { slope, intercept };
+    }
+
+    /**
+     * Faz previsões usando um modelo de regressão linear treinado.
+     * @param {Array<Object>} data - Dados para fazer previsões.
+     * @param {{slope: number, intercept: number}} model - O modelo treinado.
+     * @param {string} xVar - Nome da variável independente.
+     * @returns {Array<Object>} Os dados originais com uma nova coluna 'predicted'.
+     */
+    function makePredictions(data, model, xVar) {
+        return data.map(row => ({
+            ...row,
+            predicted: model.slope * row[xVar] + model.intercept
+        }));
+    }
+
+    /**
+     * Detecta anomalias com base em um simples limiar de valor.
+     * @param {Array<Object>} data - O conjunto de dados.
+     * @param {string} valueColumn - A coluna a ser verificada ('valor_transacao').
+     * @param {number} threshold - O limiar para marcar como anomalia.
+     * @returns {Array<Object>} Dados com a coluna 'is_anomaly'.
+     */
+    function detectAnomalies(data, valueColumn, threshold) {
+        return data.map(row => ({
+            ...row,
+            is_anomaly: (row.categoria_contabil === 'Despesa' || row.categoria_contabil === 'Ajuste') && row[valueColumn] > threshold
+        }));
+    }
+    
+    /**
+     * Realiza uma análise de NLP básica: tokenização e contagem de frequência.
+     * @param {Array<Object>} data - O conjunto de dados.
+     * @param {string} textColumn - A coluna de texto a ser analisada ('descricao').
+     * @returns {Object} Um objeto com a contagem de palavras-chave.
+     */
+    function analyzeText(data, textColumn) {
+        const wordCount = {};
+        const keywords = ['venda', 'pagamento', 'compra', 'pedido', 'importacao', 'correcao', 'marketing', 'fornecedor'];
+        
+        data.forEach(row => {
+            const text = row[textColumn] ? row[textColumn].toLowerCase() : '';
+            keywords.forEach(keyword => {
+                if (text.includes(keyword)) {
+                    wordCount[keyword] = (wordCount[keyword] || 0) + 1;
+                }
+            });
+        });
+        return wordCount;
+    }
+
+    /**
+     * Calcula as métricas de sucesso.
+     * @param {Array<Object>} testDataWithPredictions - Dados de teste com previsões.
+     * @param {Array<Object>} allDataWithAnomalies - Todos os dados com anomalias marcadas.
+     * @param {string} yVar - A variável alvo.
+     * @returns {Object} Um objeto contendo as métricas calculadas.
+     */
+    function calculateMetrics(testDataWithPredictions, allDataWithAnomalies, yVar) {
+        // Métrica de Precisão da Previsão
+        let totalError = 0;
+        let totalActual = 0;
+        testDataWithPredictions.forEach(row => {
+            totalError += Math.abs(row[yVar] - row.predicted);
+            totalActual += row[yVar];
+        });
+        const meanAbsoluteError = totalError / testDataWithPredictions.length;
+        const meanActualValue = totalActual / testDataWithPredictions.length;
+        const accuracy = Math.max(0, 1 - (meanAbsoluteError / meanActualValue));
+        
+        // Contagem de anomalias
+        const anomalyCount = allDataWithAnomalies.filter(row => row.is_anomaly).length;
+
+        return {
+            accuracy: accuracy,
+            anomalies: anomalyCount,
+            // Métricas fixas para a proposta
+            timeReduction: 0.30,
+            errorReduction: 0.40
+        };
+    }
+    
+    /**
+     * Atualiza todo o dashboard com os novos dados e resultados.
+     * @param {Array<Object>} processedData - Dados completos após todas as etapas.
+     * @param {Object} metrics - Métricas calculadas.
+     * @param {Object} nlpResults - Resultados da análise de texto.
+     * @param {string} yVar - Variável alvo para os gráficos.
+     */
+    function updateDashboard(processedData, metrics, nlpResults, yVar) {
+        // Atualiza KPIs
+        UIElements.kpiTime.textContent = `-${(metrics.timeReduction * 100).toFixed(0)}%`;
+        UIElements.kpiError.textContent = `-${(metrics.errorReduction * 100).toFixed(0)}%`;
+        UIElements.kpiAccuracy.textContent = `${(metrics.accuracy * 100).toFixed(1)}%`;
+        UIElements.kpiAccuracy.className = `value ${metrics.accuracy > 0.85 ? 'positive' : 'negative'}`;
+        UIElements.kpiAnomalies.textContent = metrics.anomalies;
+        
+        // Atualiza Gráficos
+        const labels = processedData.map(d => d.data || d.id);
+        const actuals = processedData.map(d => d[yVar]);
+        const predictions = processedData.map(d => d.predicted);
+        drawLineChart(labels, actuals, predictions);
+
+        drawPieChart(nlpResults);
+
+        // Atualiza Tabela
+        updateTable(processedData);
+    }
+    
+    /**
+     * Desenha o gráfico de linhas (Previsão vs. Real).
+     */
+    function drawLineChart(labels, actualData, predictedData) {
+        if (chartInstances.line) chartInstances.line.destroy();
+        // Usando um truque com uma biblioteca de gráfico embutida como string para simplificar
+        // Em um caso real, seria desenhado manualmente no canvas
+        const SimpleChart = {
+            create: (ctx, config) => {
+                // Simulação de criação de gráfico para não importar uma lib inteira
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                const maxVal = Math.max(...actualData, ...predictedData.filter(v => v));
+                const width = ctx.canvas.width;
+                const height = ctx.canvas.height;
+                const padding = 30;
+
+                // Draw Axes
+                ctx.beginPath();
+                ctx.moveTo(padding, padding);
+                ctx.lineTo(padding, height - padding);
+                ctx.lineTo(width - padding, height - padding);
+                ctx.stroke();
+
+                // Plot function
+                const plotData = (data, color) => {
+                    ctx.strokeStyle = color;
+                    ctx.beginPath();
+                    data.forEach((point, i) => {
+                        if (point === null || point === undefined) return;
+                        const x = padding + i * (width - 2 * padding) / (labels.length - 1);
+                        const y = height - padding - (point / maxVal) * (height - 2 * padding);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    });
+                    ctx.stroke();
+                };
+                
+                plotData(actualData, 'rgba(0, 90, 156, 0.8)'); // Real
+                plotData(predictedData, 'rgba(243, 156, 18, 0.8)'); // Previsto
+            }
+        };
+        // Para uma demo visual, esta abordagem manual é suficiente
+        SimpleChart.create(UIElements.predictionChartCtx, {});
+    }
+
+    /**
+     * Desenha o gráfico de pizza (NLP).
+     */
+    function drawPieChart(nlpData) {
+        const ctx = UIElements.nlpPieChartCtx;
+        const legendContainer = UIElements.pieChartLegend;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        legendContainer.innerHTML = '';
+        
+        const labels = Object.keys(nlpData);
+        const values = Object.values(nlpData);
+        const total = values.reduce((a, b) => a + b, 0);
+        if (total === 0) return;
+
+        const colors = ['#003366', '#005a9c', '#f39c12', '#3498db', '#e74c3c', '#9b59b6', '#2ecc71', '#1abc9c'];
+        let startAngle = 0;
+        
+        labels.forEach((label, i) => {
+            const sliceAngle = (values[i] / total) * 2 * Math.PI;
+            const color = colors[i % colors.length];
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.arc(ctx.canvas.width / 2, ctx.canvas.height / 2, ctx.canvas.height / 2, startAngle, startAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fill();
+            startAngle += sliceAngle;
+
+            // Add to legend
+            const legendItem = document.createElement('li');
+            legendItem.innerHTML = `<span class="legend-color" style="background-color: ${color}"></span> ${label} (${values[i]})`;
+            legendContainer.appendChild(legendItem);
+        });
+    }
+
+    /**
+     * Preenche a tabela de dados e adiciona a funcionalidade de filtro.
+     */
+    function updateTable(data) {
+        UIElements.tableHeader.innerHTML = '';
+        UIElements.tableBody.innerHTML = '';
+
+        if (data.length === 0) return;
+
+        const headers = Object.keys(data[0]);
+        const headerRow = document.createElement('tr');
+        headers.forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            headerRow.appendChild(th);
+        });
+        UIElements.tableHeader.appendChild(headerRow);
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            if (row.is_anomaly) {
+                tr.classList.add('anomaly');
+            }
+            headers.forEach(header => {
+                const td = document.createElement('td');
+                let value = row[header];
+                if (typeof value === 'number') {
+                    td.textContent = value.toFixed(2);
+                } else {
+                    td.textContent = value;
+                }
+                tr.appendChild(td);
+            });
+            UIElements.tableBody.appendChild(tr);
+        });
+    }
+
+    /**
+     * Função principal que orquestra todo o processo de análise.
+     */
+    async function runFullAnalysis() {
+        try {
+            // 1. Carregar Dados
+            let data;
+            if (UIElements.dataSourceSelect.value === 'sample') {
+                data = parseCSV(sampleCSVData);
+            } else {
+                const file = UIElements.fileInput.files[0];
+                if (!file) {
+                    throw new Error("Por favor, selecione um arquivo CSV.");
+                }
+                const text = await file.text();
+                data = parseCSV(text);
+            }
+
+            // 2. Limpar Dados
+            const cleanedData = cleanData(data);
+            fullData = cleanedData; // Salva para o filtro
+
+            // 3. Obter Parâmetros da UI
+            const yVar = UIElements.predictorVarSelect.value;
+            const xVar = UIElements.featureVarSelect.value;
+            const threshold = parseFloat(UIElements.anomalyThresholdInput.value);
+            const splitRatio = parseInt(UIElements.splitRange.value) / 100;
+
+            // 4. Módulo de Previsão
+            const { trainData, testData } = trainTestSplit(cleanedData, splitRatio);
+            const model = trainLinearRegression(trainData, xVar, yVar);
+            const testDataWithPredictions = makePredictions(testData, model, xVar);
+            const allDataWithPredictions = makePredictions(cleanedData, model, xVar);
+            
+            // 5. Módulo de Detecção de Anomalias
+            const processedData = detectAnomalies(allDataWithPredictions, 'valor_transacao', threshold);
+            
+            // 6. Módulo de NLP
+            const nlpResults = analyzeText(processedData, 'descricao');
+
+            // 7. Calcular Métricas
+            const metrics = calculateMetrics(testDataWithPredictions, processedData, yVar);
+            
+            // 8. Atualizar Dashboard
+            updateDashboard(processedData, metrics, nlpResults, yVar);
+
+            showMessage("Análise concluída com sucesso!", "success");
+
+        } catch (error) {
+            console.error("Erro na análise:", error);
+            showMessage(`Erro: ${error.message}`, "error");
+        }
+    }
+
+    // --- Event Listeners ---
+
+    // Atualiza a UI quando a fonte de dados muda
+    UIElements.dataSourceSelect.addEventListener('change', () => {
+        UIElements.fileInput.style.display = UIElements.dataSourceSelect.value === 'upload' ? 'block' : 'none';
+    });
+
+    // Atualiza o valor do range de split
+    UIElements.splitRange.addEventListener('input', () => {
+        UIElements.splitValue.textContent = `${UIElements.splitRange.value}%`;
+    });
+
+    // Filtro da tabela
+    UIElements.tableFilter.addEventListener('keyup', (e) => {
+        const filterText = e.target.value.toLowerCase();
+        const rows = UIElements.tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            const rowText = row.textContent.toLowerCase();
+            row.style.display = rowText.includes(filterText) ? '' : 'none';
+        });
+    });
+
+    // Botão principal para executar a análise
+    UIElements.runButton.addEventListener('click', runFullAnalysis);
+
+    // Executa a análise com dados de exemplo ao carregar a página
+    window.addEventListener('DOMContentLoaded', () => {
+        runFullAnalysis();
+    });
+
+    // --- FIM DO CÓDIGO JAVASCRIPT ---
+    </script>
+</body>
+</html>
